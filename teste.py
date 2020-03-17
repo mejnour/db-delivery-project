@@ -4,7 +4,10 @@ import mysql.connector
 mydb = mysql.connector.connect(
   host="remotemysql.com",
   user="SKdTbdX8lK",
-  passwd="yODtLD4Q0z"
+  passwd="yODtLD4Q0z",
+  database="SKdTbdX8lK",
+  
 )
 #connect in database
-database="SKdTbdX8lK"
+
+
