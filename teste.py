@@ -1,4 +1,3 @@
-
 import mysql.connector
 
 #starting conection
@@ -7,5 +6,5 @@ mydb = mysql.connector.connect(
   user="SKdTbdX8lK",
   passwd="yODtLD4Q0z"
 )
-
-print(mydb)
+#connect in database
+database="SKdTbdX8lK"
