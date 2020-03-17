@@ -1,0 +1,103 @@
+/* Diagrama_Logico: */
+
+CREATE TABLE Restaurante (
+    ID_restaurante INTEGER PRIMARY KEY AUTO_INCREMENT,
+    Categoria VARCHAR (255),
+    Nome VARCHAR (255),
+    Senha VARCHAR (255),
+    Email VARCHAR (255),
+    Telefone VARCHAR (255),
+    Endereco_ VARCHAR (255),
+    Entrega_rapida NUMERIC,
+    Entrega_gratis NUMERIC
+);
+
+CREATE TABLE CardapioContemComida (
+ 
+);
+
+CREATE TABLE cardapio (
+	ID_cardapio int PRIMARY KEY AUTO_INCREMENT,
+	Nome_cardapio VARCHAR (255),
+    ID_restaurante INTEGER,
+	CONSTRAINT fk_Restaurante_ID_restaurante FOREIGN KEY (ID_restaurante) REFERENCES Restaurante (ID_restaurante)
+);
+
+CREATE TABLE CardapioContemComida (
+  ID_Comida INTEGER,
+  ID_cardapio INTEGER,
+  CONSTRAINT fk_cardapio_ID_cardapio FOREIGN KEY (ID_cardapio) REFERENCES cardapio (ID_cardapio),
+  CONSTRAINT fk_Cardapio_Comida_ID_Comida FOREIGN KEY (ID_Comida) REFERENCES Comida (ID_Comida)
+);
+	
+
+CREATE TABLE Comida (
+    ID_Comida INTEGER PRIMARY KEY AUTO_INCREMENT,
+    Nome VARCHAR (255),
+    Descricao VARCHAR (255),
+    Preco FLOAT,
+    Categoria VARCHAR (255)
+);
+
+
+CREATE TABLE Usuario (
+    ID_Usuario INTEGER PRIMARY KEY AUTO_INCREMENT,
+    Nome VARCHAR (255),
+    Senha VARCHAR (255),
+    Email VARCHAR (255),
+    Telefone VARCHAR (255),
+    Endereco VARCHAR (255)
+);
+
+CREATE TABLE Pedido (
+    ID_pedido INTEGER PRIMARY KEY AUTO_INCREMENT,
+    Data_hora DATE,
+    ID_restaurante INTEGER,
+    ID_Usuario INTEGER,
+    Local_de_entrega VARCHAR (255),
+    CONSTRAINT fk_pedido_Restaurante_ID_restaurante FOREIGN KEY (ID_restaurante) REFERENCES Restaurante (ID_restaurante),
+    CONSTRAINT fk_Usuario_ID_Usuario FOREIGN KEY (ID_Usuario) REFERENCES Usuario (ID_Usuario)
+);
+
+CREATE TABLE Preco (
+    Valor FLOAT,
+    Data_hora DATE
+);
+
+CREATE TABLE PedidoContemComida (
+   ID_pedido INTEGER,
+   ID_Comida INTEGER,
+   CONSTRAINT fk_Pedido_ID_pedido FOREIGN KEY (ID_pedido) REFERENCES Pedido(ID_pedido),
+   CONSTRAINT fk_comida_ID_comida FOREIGN KEY (ID_Comida) REFERENCES Comida(ID_Comida)
+
+);
+
+CREATE TABLE Contem (
+    ID_cardapio INTEGER,
+    ID_Comida INTEGER
+);
+
+CREATE TABLE Historico (
+    ID_Comida INTEGER,
+    CONSTRAINT fk_historico_Comida_ID_Comida FOREIGN KEY (ID_Comida) REFERENCES Comida (ID_Comida)
+);
+
+ALTER TABLE Contem ADD CONSTRAINT FK_Contem_Cardapio
+    FOREIGN KEY (fk_Cardapio)
+    REFERENCES Cardapio (ID_cardapio)
+    ON DELETE RESTRICT;
+    
+ ALTER TABLE Contem ADD CONSTRAINT FK_Contem_Comida
+    FOREIGN KEY (fk_Comida)
+    REFERENCES Comida (ID_Comida)
+    ON DELETE RESTRICT;
+ 
+ALTER TABLE Comida ADD CONSTRAINT FK_Comida_pedido
+    FOREIGN KEY (fk_Pedido)
+    REFERENCES Pedido (ID_pedido)
+    ON DELETE RESTRICT;
+ 
+ALTER TABLE Historico ADD CONSTRAINT FK_Historico_1
+    FOREIGN KEY (fk_Comida_ID_Comida)
+    REFERENCES Comida (ID_Comida)
+    ON DELETE SET NULL;
