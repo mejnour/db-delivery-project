@@ -1,0 +1,8 @@
+# ignore teste.py
+teste.py
+
+# ignore vscode
+/.vscode
+
+# ignore this file
+.gitignore
