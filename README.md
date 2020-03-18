@@ -12,12 +12,12 @@ A equipe é composta por:
 
 ## O Projeto
 
-    Este projeto foi desenvolvido em Python mais o SGDB [remotemysql](remotemysql.com).
+Este projeto foi desenvolvido em Python mais o SGDB [remotemysql](remotemysql.com).
 
 ## Como utilizar
 
 ### Dependências
 
-    1. Python3;
+1. Python3;
 
 ## Possíveis melhorias
