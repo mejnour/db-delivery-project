@@ -126,6 +126,16 @@ def insertProduct(restaurante ,nome, descricao, categoria, preco):
     formattedDate = dataDeRegistroComida.strftime('%Y-%m-%d %H:%M:%S')
     #print(formattedDate)
     #print(type(formattedDate))
+
+    mySql_contemInsert_query = """INSERT INTO Contem (ID_cardapio, ID_Comida)
+                                  VALUES
+                                  ({}, {})""".format(idCardapioBuscado, idDaComidaInserida)
+    cursor = connection.cursor()
+    cursor.execute(mySql_contemInsert_query)
+    connection.commit()
+    print(cursor.rowcount, "Record inserted successfully into Contem table")
+    cursor.close()   
+
     mySql_precoInsert_query = """INSERT INTO Preco (Valor, Data_hora, ID_Comida)
                                  VALUES
                                  ({}, '{}', {})""".format(preco, formattedDate, idDaComidaInserida)
@@ -175,7 +185,7 @@ def showProductsFromRestaurant(restaurante):
       records = cursor.fetchall()
       for row in records:
         print('\nNome do Produto:', row[1])
-        print('Categoria:', row[3])
+        print('Categoria:', row[4])
         print('Descrição:', row[2])        
         mySql_precoSelect_query = "SELECT Valor FROM Preco WHERE ID_Comida = {}".format(listaDeIdComidas[i])
         cursor.execute(mySql_precoSelect_query)
