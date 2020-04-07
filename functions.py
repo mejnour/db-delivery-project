@@ -121,11 +121,11 @@ def insertProduct(restaurante ,nome, descricao, categoria, preco):
     cursor.execute(mySql_idComidaSelect_query)
     records = cursor.fetchall()
     idDaComidaInserida = records[0][0]
-    print(idDaComidaInserida)
+    #print(idDaComidaInserida)
     dataDeRegistroComida = datetime.datetime.utcnow()
     formattedDate = dataDeRegistroComida.strftime('%Y-%m-%d %H:%M:%S')
-    print(formattedDate)
-    print(type(formattedDate))
+    #print(formattedDate)
+    #print(type(formattedDate))
     mySql_precoInsert_query = """INSERT INTO Preco (Valor, Data_hora, ID_Comida)
                                  VALUES
                                  ({}, '{}', {})""".format(preco, formattedDate, idDaComidaInserida)
