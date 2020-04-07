@@ -251,8 +251,18 @@ def showCategories():
     cursor.execute(mySql_categoriaSelect_query)
     records = cursor.fetchall()
     print('Categorias Disponíveis:')
+
+    # array auxiliar usado para limitar
+    # a quantidade de categorias, mostrando
+    # apenas uma de cada.
+    show_only = []
+
     for i in range(len(records)):
-      print('\n', records[i][0])
+      if records[i][0] not in show_only: # teste se a entrada já está no array
+        show_only.append(records[i][0])
+        # print(show_only)
+        print('\n', records[i][0])
+    print('\n')
 
   except mysql.connector.Error as error:
     print("Failed to get record into Comida table {}".format(error))
