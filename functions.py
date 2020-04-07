@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 import mysql.connector
 from mysql.connector import Error
 from mysql.connector import errorcode
-
+import datetime
 
 #Insert do Usuario
 def insertUser(nome, senha, email, telefone, endereco):
@@ -73,9 +74,8 @@ def insertRestaurant(categoria, nome, senha, email, telefone, endereco, tipoDeEn
       print("MySQL connection is closed")
 
 #Inserir produto
-def insertProduct(restaurante ,nome, descricao, categoria):
+def insertProduct(restaurante ,nome, descricao, categoria, preco):
   #Consulta
-  restaurante = restaurante
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
                                          user="SKdTbdX8lK",
@@ -107,14 +107,33 @@ def insertProduct(restaurante ,nome, descricao, categoria):
                                          user="SKdTbdX8lK",
                                          passwd="yODtLD4Q0z",
                                          database='SKdTbdX8lK')
-    mySql_insert_query = """INSERT INTO Comida (Nome, Descricao, Categoria, ID_cardapio)
+    mySql_insert_query = """INSERT INTO Comida (Nome, Descricao, ID_cardapio, Categoria)
                             VALUES
-                            ('{}', '{}', '{}', {})""".format(nome, descricao, categoria, idCardapioBuscado)
+                            ('{}', '{}', {}, '{}')""".format(nome, descricao, idCardapioBuscado, categoria)
     cursor = connection.cursor()
     cursor.execute(mySql_insert_query)
     connection.commit()
     print(cursor.rowcount, "Record inserted successfully into Comida table")
     cursor.close()
+
+    mySql_idComidaSelect_query = "SELECT ID_Comida FROM Comida WHERE Nome = '{}'".format(nome)
+    cursor = connection.cursor()
+    cursor.execute(mySql_idComidaSelect_query)
+    records = cursor.fetchall()
+    idDaComidaInserida = records[0][0]
+    print(idDaComidaInserida)
+    dataDeRegistroComida = datetime.datetime.utcnow()
+    formattedDate = dataDeRegistroComida.strftime('%Y-%m-%d %H:%M:%S')
+    print(formattedDate)
+    print(type(formattedDate))
+    mySql_precoInsert_query = """INSERT INTO Preco (Valor, Data_hora, ID_Comida)
+                                 VALUES
+                                 ({}, '{}', {})""".format(preco, formattedDate, idDaComidaInserida)
+    cursor = connection.cursor()
+    cursor.execute(mySql_precoInsert_query)
+    connection.commit()
+    print(cursor.rowcount, "Record inserted successfully into Preco table")
+    cursor.close() 
 
   except mysql.connector.Error as error:
     print("Failed to insert record into Comida table {}".format(error))
@@ -126,7 +145,6 @@ def insertProduct(restaurante ,nome, descricao, categoria):
 
 #Função para mostrar as comidas de um restaurante
 def showProductsFromRestaurant(restaurante):
-  restaurante = restaurante
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
                                          user="SKdTbdX8lK",
@@ -166,6 +184,53 @@ def showProductsFromRestaurant(restaurante):
   
   except mysql.connector.Error as error:
     print("Failed to get record into Restaurante table {}".format(error))
+
+  finally:
+    if(connection.is_connected()):
+      cursor.close()
+      connection.close()
+      print("MySQL connection is closed")
+      return
+
+#TODO Ao selecionar comida, retornar restaurantes que vendem
+def showRestaurantsWithProduct(comida):
+  try:
+    connection = mysql.connector.connect(host='remotemysql.com',
+                                         user="SKdTbdX8lK",
+                                         passwd="yODtLD4Q0z",
+                                         database='SKdTbdX8lK')
+    mySql_idSelect_query = "SELECT ID_Comida FROM Comida WHERE Nome = '{}'".format(comida)
+    cursor = connection.cursor()
+    cursor.execute(mySql_idSelect_query)
+    records = cursor.fetchall()
+    idComidaBuscado = int(records[0][0])
+    #print(idComidaBuscado)
+
+    mySql_contemSelect_query = "SELECT * FROM Contem WHERE ID_Comida = {}".format(idComidaBuscado)
+    cursor = connection.cursor()
+    cursor.execute(mySql_contemSelect_query)
+    records = cursor.fetchall()
+    listaDeIdCardapios = []
+    for row in records:
+      #print(row[0])
+      listaDeIdCardapios.append(row[0])
+    for i in range(len(listaDeIdCardapios)):
+      mySql_IDrestauranteSelect_query = "SELECT * FROM Cardapio WHERE ID_cardapio = {}".format(listaDeIdCardapios[i])
+      cursor.execute(mySql_IDrestauranteSelect_query)
+      recordsCardapio = cursor.fetchall()
+      listadeIdRestaurantes = []
+      for row in recordsCardapio:
+        #print(row[2])
+        listadeIdRestaurantes.append(row[2])
+      for j in range(len(listadeIdRestaurantes)):
+        mySql_restauranteSelect_query = "SELECT * FROM Restaurante WHERE ID_restaurante = {}".format(listadeIdRestaurantes[j])
+        cursor.execute(mySql_restauranteSelect_query)
+        recordsRestaurante = cursor.fetchall()
+        for row in recordsRestaurante:
+          print('\nNome do Restaurante:', row[2])
+
+  except mysql.connector.Error as error:
+    print("Failed to get record into Contem table {}".format(error))
 
   finally:
     if(connection.is_connected()):
@@ -227,7 +292,8 @@ def askProductInformationInput():
   nomeComida = input('Nome da comida: ')
   descricao = input('Descrição: ')
   categoria = input('Categoria: ')
-  return nomeRestaurante, nomeComida, descricao, categoria
+  preco = input('Preço: ')
+  return nomeRestaurante, nomeComida, descricao, categoria, preco
 
 def main():
   op = 1
@@ -238,6 +304,7 @@ def main():
     print('Digite 3 para mostrar comidas de um Restaurante')
     print('Digite 4 para mostrar as categorias de produtos disponíveis')
     print('Digite 5 para inserir um produto em um restaurante')
+    print('Digite 6 para procurar restaurantes com a comida passada')
     op = int(input())
     if (op != 0):
       if(op == 1):
@@ -252,8 +319,11 @@ def main():
       if (op == 4):
         showCategories()
       if (op == 5):
-        nomeRestaurante, nomeComida, descricao, categoria = askProductInformationInput()
-        insertProduct(nomeRestaurante, nomeComida, descricao, categoria) 
+        nomeRestaurante, nomeComida, descricao, categoria, preco= askProductInformationInput()
+        insertProduct(nomeRestaurante, nomeComida, descricao, categoria, preco)
+      if (op == 6):
+        nomeDaComida = input("Digite o nome da comida que quer procurar: ")
+        showRestaurantsWithProduct(nomeDaComida)
   print('Exiting...')
 
 main()
