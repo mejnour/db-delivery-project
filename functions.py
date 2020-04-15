@@ -213,7 +213,7 @@ def insertPedido(nomeUsuario, nomeRestaurante, enderecoDeEntrega, listaDeIdComid
                                          passwd="yODtLD4Q0z",
                                          database='SKdTbdX8lK')
     
-    mySql_idPedidoSelect_query = "SELECT ID_pedido FROM Pedido WHERE ID_Usuario = {}".format(idUsuarioBuscado)
+    mySql_idPedidoSelect_query = "SELECT ID_pedido FROM Pedido WHERE ID_Usuario = {} AND Data_hora = '{}'".format(idUsuarioBuscado, formattedDate)
     cursor = connection.cursor()
     cursor.execute(mySql_idPedidoSelect_query)
     records = cursor.fetchall()
@@ -239,6 +239,7 @@ def insertPedido(nomeUsuario, nomeRestaurante, enderecoDeEntrega, listaDeIdComid
       connection.close()
       print("MySQL connection is closed")
 
+#Função para deletar produto das tabelas Preco, Contem e Comida utilizando nome do restaurante e do produto
 def deleteProduct(nomeDoRestaurante,nomeDaComida):
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
@@ -283,6 +284,67 @@ def deleteProduct(nomeDoRestaurante,nomeDaComida):
 
   finally:
     if (connection.is_connected()):
+      connection.close()
+      print("MySQL connection is closed")
+
+def showProductAverageHistory(nomeDoRestaurante):
+  try:
+    connection = mysql.connector.connect(host='remotemysql.com',
+                                         user="SKdTbdX8lK",
+                                         passwd="yODtLD4Q0z",
+                                         database='SKdTbdX8lK')
+    mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(nomeDoRestaurante)
+    cursor = connection.cursor()
+    cursor.execute(mySql_idRestauranteSelect_query)
+    records = cursor.fetchall()
+    idRestauranteBuscado = int(records[0][0])
+
+    mySql_idCardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
+    cursor.execute(mySql_idCardapioSelect_query)
+    records = cursor.fetchall()
+    idCardapioBuscado = int(records[0][0])
+
+  except mysql.connector.Error as error:
+    print("Failed to get record into Restaurante table {}".format(error))
+
+  try:
+    mySql_idComidaSelect_query = "SELECT ID_Comida FROM Comida WHERE ID_cardapio = {}".format(idCardapioBuscado)
+    cursor = connection.cursor()
+    cursor.execute(mySql_idComidaSelect_query)
+    records = cursor.fetchall()
+    idComidaBuscada = records
+    listaDeIdComidas = []
+    for i in range(len(records)):
+      listaDeIdComidas.append(records[i][0])
+    #print(listaDeIdComidas)
+  
+  except mysql.connector.Error as error:
+    print("Failed to get record into Comida table {}".format(error))
+
+  try:
+    for i in range(len(listaDeIdComidas)):
+      idAtual = int(listaDeIdComidas[i])
+      mySql_avgPrecoSelect_query = "SELECT AVG(Valor), ID_Comida from Preco WHERE ID_Comida = {} AND Data_hora >= DATE_ADD(CURRENT_DATE(),INTERVAL -7 DAY) GROUP BY ID_Comida".format(idAtual)
+      cursor = connection.cursor()
+      cursor.execute(mySql_avgPrecoSelect_query)
+      records = cursor.fetchall()
+      
+      for row in records:
+        mySql_idComidaSelect_query = "SELECT Nome FROM Comida WHERE ID_Comida = {}".format(row[1])
+        cursor = connection.cursor()
+        cursor.execute(mySql_idComidaSelect_query)
+        recordsNomeComida = cursor.fetchall()
+        nomeDaComida = str(recordsNomeComida[0][0])
+        print('\n----Produtos Do Restaurante----')
+        print('\nNome do Produto:', nomeDaComida)
+        print('Preço médio dele nos últimos 7 dias: R$:', row[0])
+  
+  except mysql.connector.Error as error:
+    print("Failed to get record into Preco table {}".format(error))
+  
+  finally:
+    if(connection.is_connected()):
+      cursor.close()
       connection.close()
       print("MySQL connection is closed")
 
@@ -465,6 +527,7 @@ def main():
     print('Digite 5 para inserir um produto em um restaurante')
     print('Digite 6 para procurar restaurantes com a comida passada')
     print('Digite 7 para deletar um produto de um restaurante específico')
+    print('Digite 8 para mostrar um histórico dos preços médios das comidas de um restaurante específico')
     op = int(input())
     if (op != 0):
       if(op == 1):
@@ -487,13 +550,16 @@ def main():
       if (op == 7):
         nomeDoRestaurante, nomeDaComida = askProductInfoForDeletion()
         deleteProduct(nomeDoRestaurante, nomeDaComida)
+      if (op == 8):
+        nomeDoRestaurante = input('Nome do restaurante: ')
+        showProductAverageHistory(nomeDoRestaurante)
   print('Exiting...')
 
 def testeInsertPedido():
   nomeDoUsuario = 'Jill Valentine'
-  nomeDoRestaurante = 'O Sebosão'
+  nomeDoRestaurante = 'Habibs'
   enderecoDeEntrega = '1250 W South St, Raccon City'
-  listaDeIdComidas = [3,17,15]
+  listaDeIdComidas = [25]
   
   insertPedido(nomeDoUsuario, nomeDoRestaurante, enderecoDeEntrega, listaDeIdComidas)
 
