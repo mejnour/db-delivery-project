@@ -7,11 +7,6 @@ import datetime
 #Insert do Usuario
 def insertUser(nome, senha, email, telefone, endereco):
   #Inicialmente os parâmetros estão assim, mas podem ser modificados para ficar em outro estilo(receber tuplas ou objetos)
-  nome = nome
-  senha = senha
-  email = email
-  telefone = telefone
-  endereco = endereco
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
                                          user="SKdTbdX8lK",
@@ -139,7 +134,7 @@ def insertProduct(restaurante ,nome, descricao, categoria, preco):
     records = cursor.fetchall()
     idDaComidaInserida = records[0][0]
     #print(idDaComidaInserida)
-    dataDeRegistroComida = datetime.datetime.utcnow()
+    dataDeRegistroComida = datetime.datetime.now()
     formattedDate = dataDeRegistroComida.strftime('%Y-%m-%d %H:%M:%S')
     #print(formattedDate)
     #print(type(formattedDate))
@@ -164,6 +159,80 @@ def insertProduct(restaurante ,nome, descricao, categoria, preco):
 
   except mysql.connector.Error as error:
     print("Failed to insert record into Comida table {}".format(error))
+
+  finally:
+    if(connection.is_connected()):
+      connection.close()
+      print("MySQL connection is closed")
+
+#Função de inserir na tabela Pedido
+def insertPedido(nomeUsuario, nomeRestaurante, enderecoDeEntrega, listaDeIdComidas):
+  try:
+    connection = mysql.connector.connect(host='remotemysql.com',
+                                         user="SKdTbdX8lK",
+                                         passwd="yODtLD4Q0z",
+                                         database='SKdTbdX8lK')
+    
+    mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(nomeRestaurante)
+    cursor = connection.cursor()
+    cursor.execute(mySql_idRestauranteSelect_query)
+    records = cursor.fetchall()
+    idRestauranteBuscado = int(records[0][0])
+    #print(idRestauranteBuscado)
+
+    mySql_idUsuarioSelect_query = "SELECT ID_Usuario FROM Usuario WHERE Nome = '{}'".format(nomeUsuario)
+    cursor = connection.cursor()
+    cursor.execute(mySql_idUsuarioSelect_query)
+    records = cursor.fetchall()
+    idUsuarioBuscado = int(records[0][0])
+    #print(idRestauranteBuscado)
+    
+    dataDePedidoFeito = datetime.datetime.now()
+    formattedDate = dataDePedidoFeito.strftime('%Y-%m-%d %H:%M:%S')
+
+    mySql_pedidoInsert_query = """INSERT INTO Pedido (Data_hora, ID_restaurante, ID_Usuario, Local_de_entrega)
+                                  VALUES
+                                  ('{}', {}, {}, '{}')""".format(formattedDate, idRestauranteBuscado, idUsuarioBuscado, enderecoDeEntrega)
+    cursor = connection.cursor()
+    cursor.execute(mySql_pedidoInsert_query)
+    connection.commit()
+    print(cursor.rowcount, "Record inserted successfully into Pedido table")
+    cursor.close()
+
+  except mysql.connector.Error as error:
+    print("Failed to insert record into Pedido table {}".format(error))
+
+  finally:
+    if(connection.is_connected()):
+      connection.close()
+      print("MySQL connection is closed")
+  
+  try:
+    connection = mysql.connector.connect(host='remotemysql.com',
+                                         user="SKdTbdX8lK",
+                                         passwd="yODtLD4Q0z",
+                                         database='SKdTbdX8lK')
+    
+    mySql_idPedidoSelect_query = "SELECT ID_pedido FROM Pedido WHERE ID_Usuario = {}".format(idUsuarioBuscado)
+    cursor = connection.cursor()
+    cursor.execute(mySql_idPedidoSelect_query)
+    records = cursor.fetchall()
+    idPedidoFeito = int(records[0][0])
+    #print(idRestauranteBuscado)
+    
+    for i in range(len(listaDeIdComidas)):
+      idComidaAtual = int(listaDeIdComidas[i])
+      mySql_pedidoContemComidaInsert_query = """INSERT INTO PedidoContemComida (ID_pedido, ID_Comida)
+                                                VALUES
+                                                ({}, {})""".format(idPedidoFeito, idComidaAtual)
+      cursor = connection.cursor()
+      cursor.execute(mySql_pedidoContemComidaInsert_query)
+      connection.commit()
+      print(cursor.rowcount, "Record inserted successfully into PedidoContemComida table")
+      cursor.close()
+
+  except mysql.connector.Error as error:
+    print("Failed to insert record into PedidoContemComida table {}".format(error))
 
   finally:
     if(connection.is_connected()):
@@ -363,5 +432,14 @@ def main():
         showRestaurantsWithProduct(nomeDaComida)
   print('Exiting...')
 
-main()
+def testeInsertPedido():
+  nomeDoUsuario = 'Jill Valentine'
+  nomeDoRestaurante = 'O Sebosão'
+  enderecoDeEntrega = '1250 W South St, Raccon City'
+  listaDeIdComidas = [3,17,15]
+  
+  insertPedido(nomeDoUsuario, nomeDoRestaurante, enderecoDeEntrega, listaDeIdComidas)
 
+#main()
+
+testeInsertPedido()
