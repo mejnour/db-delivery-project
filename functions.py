@@ -56,13 +56,30 @@ def insertRestaurant(categoria, nome, senha, email, telefone, endereco, tipoDeEn
                                          user="SKdTbdX8lK",
                                          passwd="yODtLD4Q0z",
                                          database='SKdTbdX8lK')
-    mySql_insert_query = """INSERT INTO Restaurante (Categoria, Nome, Senha, Email, Telefone, Endereco_, Entrega_rapida, Entrega_gratis)
+    mySql_restauranteInsert_query = """INSERT INTO Restaurante (Categoria, Nome, Senha, Email, Telefone, Endereco_, Entrega_rapida, Entrega_gratis)
                             VALUES
                             ('{}', '{}', '{}', '{}', '{}', '{}', {}, {})""".format(categoria, nome, senha, email, telefone, endereco, entrega_rapida, entrega_gratis)
     cursor = connection.cursor()
-    cursor.execute(mySql_insert_query)
+    cursor.execute(mySql_restauranteInsert_query)
     connection.commit()
     print(cursor.rowcount, "Record inserted successfully into Restaurante table")
+    cursor.close()
+
+    mySql_idSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(nome)
+    cursor = connection.cursor()
+    cursor.execute(mySql_idSelect_query)
+    records = cursor.fetchall()
+    idRestauranteBuscado = int(records[0][0])
+    #print(idRestauranteBuscado)
+
+    nomeDoCardapio = nome + '_Cardapio'
+    mySql_cardapioInsert_query = """INSERT INTO Cardapio (Nome_cardapio, ID_restaurante)
+                            VALUES
+                            ('{}', {})""".format(nomeDoCardapio, idRestauranteBuscado)
+    cursor = connection.cursor()
+    cursor.execute(mySql_cardapioInsert_query)
+    connection.commit()
+    print(cursor.rowcount, "Record inserted successfully into Cardapio table")
     cursor.close()
 
   except mysql.connector.Error as error:

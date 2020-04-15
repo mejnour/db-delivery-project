@@ -1,4 +1,17 @@
-/* Diagrama_Logico: */
+Site pra o banco de dados:
+
+https://remotemysql.com/
+
+Username: SKdTbdX8lK
+Database name: SKdTbdX8lK
+Password: yODtLD4Q0z
+Server: remotemysql.com
+Port: 3306
+
+
+
+
+Código SQL: 
 
 CREATE TABLE Restaurante (
     ID_restaurante INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -12,31 +25,25 @@ CREATE TABLE Restaurante (
     Entrega_gratis NUMERIC
 );
 
-CREATE TABLE CardapioContemComida (
  
 );
 
 CREATE TABLE cardapio (
 	ID_cardapio int PRIMARY KEY AUTO_INCREMENT,
 	Nome_cardapio VARCHAR (255),
-    ID_restaurante INTEGER,
+        ID_restaurante INTEGER,
 	CONSTRAINT fk_Restaurante_ID_restaurante FOREIGN KEY (ID_restaurante) REFERENCES Restaurante (ID_restaurante)
 );
 
-CREATE TABLE CardapioContemComida (
-  ID_Comida INTEGER,
-  ID_cardapio INTEGER,
-  CONSTRAINT fk_cardapio_ID_cardapio FOREIGN KEY (ID_cardapio) REFERENCES cardapio (ID_cardapio),
-  CONSTRAINT fk_Cardapio_Comida_ID_Comida FOREIGN KEY (ID_Comida) REFERENCES Comida (ID_Comida)
-);
-	
 
 CREATE TABLE Comida (
     ID_Comida INTEGER PRIMARY KEY AUTO_INCREMENT,
     Nome VARCHAR (255),
     Descricao VARCHAR (255),
-    Preco FLOAT,
-    Categoria VARCHAR (255)
+    Categoria VARCHAR (255),
+    ID_cardapio INTERGER,
+    CONSTRAINT fk_cardapio_ID_cardapio FOREIGN KEY (ID_cardapio) REFERENCES cardapio (ID_cardapio)
+    	
 );
 
 
@@ -51,7 +58,7 @@ CREATE TABLE Usuario (
 
 CREATE TABLE Pedido (
     ID_pedido INTEGER PRIMARY KEY AUTO_INCREMENT,
-    Data_hora DATE,
+    Data_hora DATETIME,
     ID_restaurante INTEGER,
     ID_Usuario INTEGER,
     Local_de_entrega VARCHAR (255),
@@ -59,10 +66,6 @@ CREATE TABLE Pedido (
     CONSTRAINT fk_Usuario_ID_Usuario FOREIGN KEY (ID_Usuario) REFERENCES Usuario (ID_Usuario)
 );
 
-CREATE TABLE Preco (
-    Valor FLOAT,
-    Data_hora DATE
-);
 
 CREATE TABLE PedidoContemComida (
    ID_pedido INTEGER,
@@ -72,15 +75,19 @@ CREATE TABLE PedidoContemComida (
 
 );
 
-CREATE TABLE Contem (
-    ID_cardapio INTEGER,
-    ID_Comida INTEGER
+CREATE TABLE Preco (
+    Valor FLOAT,
+    Data_hora DATETIME,
+    ID_COMIDA INTEGER,
+    CONSTRAINT fk_comida1_ID_Comida FOREIGN KEY (ID_Comida) REFERENCES Comida (ID_Comida)
+
 );
 
-CREATE TABLE Historico (
+CREATE TABLE Contem (
+    ID_cardapio INTEGER,
     ID_Comida INTEGER,
-    CONSTRAINT fk_historico_Comida_ID_Comida FOREIGN KEY (ID_Comida) REFERENCES Comida (ID_Comida)
 );
+
 
 ALTER TABLE Contem ADD CONSTRAINT FK_Contem_Cardapio
     FOREIGN KEY (fk_Cardapio)
@@ -92,12 +99,4 @@ ALTER TABLE Contem ADD CONSTRAINT FK_Contem_Cardapio
     REFERENCES Comida (ID_Comida)
     ON DELETE RESTRICT;
  
-ALTER TABLE Comida ADD CONSTRAINT FK_Comida_pedido
-    FOREIGN KEY (fk_Pedido)
-    REFERENCES Pedido (ID_pedido)
-    ON DELETE RESTRICT;
- 
-ALTER TABLE Historico ADD CONSTRAINT FK_Historico_1
-    FOREIGN KEY (fk_Comida_ID_Comida)
-    REFERENCES Comida (ID_Comida)
-    ON DELETE SET NULL;
+
