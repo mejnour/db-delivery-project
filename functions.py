@@ -239,6 +239,53 @@ def insertPedido(nomeUsuario, nomeRestaurante, enderecoDeEntrega, listaDeIdComid
       connection.close()
       print("MySQL connection is closed")
 
+def deleteProduct(nomeDoRestaurante,nomeDaComida):
+  try:
+    connection = mysql.connector.connect(host='remotemysql.com',
+                                        user="SKdTbdX8lK",
+                                        passwd="yODtLD4Q0z",
+                                        database='SKdTbdX8lK')
+
+    mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(nomeDoRestaurante)
+    cursor = connection.cursor()
+    cursor.execute(mySql_idRestauranteSelect_query)
+    records = cursor.fetchall()
+    idRestauranteBuscado = int(records[0][0])
+
+    mySql_idCardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
+    cursor.execute(mySql_idCardapioSelect_query)
+    records = cursor.fetchall()
+    idCardapioBuscado = int(records[0][0])
+
+    mySql_idComidaSelect_query = "SELECT ID_Comida FROM Comida WHERE Nome = '{}' AND ID_cardapio = {}".format(nomeDaComida , idCardapioBuscado)
+    cursor.execute(mySql_idComidaSelect_query)
+    records = cursor.fetchall()
+    idComidaBuscado = int(records[0][0])
+
+    deletePrecoQuery = "DELETE FROM Preco WHERE ID_Comida = {}".format(idComidaBuscado)
+    deleteContemQuery = "DELETE FROM Contem WHERE ID_Comida = {}".format(idComidaBuscado) 
+    deleteComidaQuery = "DELETE FROM Comida WHERE ID_Comida = {}".format(idComidaBuscado)
+
+    cursor = connection.cursor()
+    
+    cursor.execute(deletePrecoQuery)
+    connection.commit()
+    cursor.execute(deleteContemQuery)
+    connection.commit()
+    cursor.execute(deleteComidaQuery)
+    connection.commit()
+    
+    print(cursor.rowcount, "Record deleted successfully from Comida table")
+    cursor.close()
+
+  except mysql.connector.Error as error:
+    print("Failed to delete record from table: {}".format(error))
+
+  finally:
+    if (connection.is_connected()):
+      connection.close()
+      print("MySQL connection is closed")
+
 #Função para mostrar as comidas de um restaurante
 def showProductsFromRestaurant(restaurante):
   try:
@@ -401,6 +448,12 @@ def askProductInformationInput():
   preco = input('Preço: ')
   return nomeRestaurante, nomeComida, descricao, categoria, preco
 
+def askProductInfoForDeletion():
+  print('\nDigite o nome dos atributos do produto que você quer deletar')
+  nomeRestaurante = input('Nome do restaurante que tem a comida: ')
+  nomeComida = input('Nome da comida a ser deletada: ')
+  return nomeRestaurante, nomeComida
+
 def main():
   op = 1
   while(op != 0):
@@ -411,6 +464,7 @@ def main():
     print('Digite 4 para mostrar as categorias de produtos disponíveis')
     print('Digite 5 para inserir um produto em um restaurante')
     print('Digite 6 para procurar restaurantes com a comida passada')
+    print('Digite 7 para deletar um produto de um restaurante específico')
     op = int(input())
     if (op != 0):
       if(op == 1):
@@ -430,6 +484,9 @@ def main():
       if (op == 6):
         nomeDaComida = input("Digite o nome da comida que quer procurar: ")
         showRestaurantsWithProduct(nomeDaComida)
+      if (op == 7):
+        nomeDoRestaurante, nomeDaComida = askProductInfoForDeletion()
+        deleteProduct(nomeDoRestaurante, nomeDaComida)
   print('Exiting...')
 
 def testeInsertPedido():
@@ -440,6 +497,6 @@ def testeInsertPedido():
   
   insertPedido(nomeDoUsuario, nomeDoRestaurante, enderecoDeEntrega, listaDeIdComidas)
 
-#main()
+main()
 
-testeInsertPedido()
+#testeInsertPedido()
