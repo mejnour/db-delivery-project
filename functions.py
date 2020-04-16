@@ -3,6 +3,7 @@ import mysql.connector
 from mysql.connector import Error
 from mysql.connector import errorcode
 import datetime
+from collections import Counter
 
 #Insert do Usuario
 def insertUser(nome, senha, email, telefone, endereco):
@@ -351,6 +352,7 @@ def showProductAverageHistory(nomeDoRestaurante):
 
 #Função para mostrar as comidas de um restaurante
 def showProductsFromRestaurant(restaurante):
+
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
                                          user="SKdTbdX8lK",
@@ -399,7 +401,8 @@ def showProductsFromRestaurant(restaurante):
       return
 
       #Mostra a comida com a maior quantidade de pedidos
-def ShowBestSellingProduct(nomeDoRestaurante):
+
+def showBestSellingProduct(nomeDoRestaurante):
 
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
@@ -413,38 +416,45 @@ def ShowBestSellingProduct(nomeDoRestaurante):
     records = cursor.fetchall()
     idRestauranteBuscado = int(records[0][0])
 
-    mySql_idCardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
-    cursor.execute(mySql_idCardapioSelect_query)
-    records = cursor.fetchall()
-    idCardapioBuscado = int(records[0][0])
-
   except mysql.connector.Error as error:
     print("Failed to get record into Restaurante table {}".format(error))
 
   try:
-    mySql_idComidaSelect_query = "SELECT ID_Comida FROM Comida WHERE ID_cardapio = {}".format(idCardapioBuscado)
+    mySql_idPedidoSelect_query = "SELECT ID_Pedido FROM Pedido WHERE ID_restaurante = {}".format(idRestauranteBuscado)
     cursor = connection.cursor()
-    cursor.execute(mySql_idComidaSelect_query)
+    cursor.execute(mySql_idPedidoSelect_query)
     records = cursor.fetchall()
-    idComidaBuscada = records
-    listaDeIdComidas = []
+    listaDeIdPedidos = []
     for i in range(len(records)):
-      listaDeIdComidas.append(records[i][0])
+      listaDeIdPedidos.append(records[i][0])
+    #print(listaDeIdPedidos)
+    
+    listaDeIdComidas = []
+    for i in range(len(listaDeIdPedidos)):
+      mySql_idComidaSelect_query = "SELECT ID_Comida FROM PedidoContemComida WHERE ID_pedido = {}".format(int(listaDeIdPedidos[i]))
+      cursor = connection.cursor()
+      cursor.execute(mySql_idComidaSelect_query)
+      records = cursor.fetchall()
+      #print(records)
+      #print(int(records[i][0]))
+      for i in range(len(records)):
+        listaDeIdComidas.append(int(records[i][0]))
+    
+    idComidaMaisVendido = int(most_frequent(listaDeIdComidas))
+    #print(most_frequent(listaDeIdComidas))
+
+    mySql_infoComidaSelect_query = "SELECT * FROM Comida WHERE ID_Comida = {}".format(idComidaMaisVendido)
+    cursor = connection.cursor()
+    cursor.execute(mySql_infoComidaSelect_query)
+    records = cursor.fetchall()
+    print('---Comida Mais Vendida do Restaurante: ' + nomeDoRestaurante + '---')
+    for row in records:
+      print('Nome: ', row[1])
+      print('Descrição: ', row[2])
+      print('Categoria: ', row[4])
   
   except mysql.connector.Error as error:
     print("Failed to get record into Comida table {}".format(error))
-
-  try:
-    for i in range(len(listaDeIdComidas)):
-      idAtual = int(listaDeIdComidas[i])
-      mySql_avgPrecoSelect_query = "SELECT ID_Comida FROM PedidoContemComida GROUP BY ID_Comida ORDER BY COUNT(*) DESC LIMIT 1".format(listaDeIdComidas[i])
-      cursor = connection.cursor()
-      cursor.execute(mySql_avgPrecoSelect_query)
-      records = cursor.fetchall()
-
-  
-  except mysql.connector.Error as error:
-    print("Failed to get record into Preco table {}".format(error))
   
   finally:
     if(connection.is_connected()):
@@ -611,8 +621,8 @@ def main():
         nomeDoRestaurante = input('Nome do restaurante: ')
         showProductAverageHistory(nomeDoRestaurante)
       if (op == 9):
-        nomeDoRestaurante = input ('nome do restaurante: ')
-        ShowBestSellingProduct(nomeDoRestaurante)  
+        nomeDoRestaurante = input ('Nome do restaurante: ')
+        showBestSellingProduct(nomeDoRestaurante)  
 
   print('Exiting...')
 
@@ -623,6 +633,10 @@ def testeInsertPedido():
   listaDeIdComidas = [25]
   
   insertPedido(nomeDoUsuario, nomeDoRestaurante, enderecoDeEntrega, listaDeIdComidas)
+
+def most_frequent(List):
+  occurence_count = Counter(List) 
+  return occurence_count.most_common(1)[0][0]
 
 main()
 
