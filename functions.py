@@ -6,8 +6,53 @@ import datetime
 from collections import Counter
 
 
+#Função para mostrar todo histórico de um usuário
+def clientOrderHistory(nomeDoUsuario):
+  try:
+    connection = mysql.connector.connect(host='remotemysql.com',
+                                         user="SKdTbdX8lK",
+                                         passwd="yODtLD4Q0z",
+                                         database='SKdTbdX8lK')
+    
+    mySql_idUsuarioSelect_query = "SELECT ID_Usuario FROM Usuario WHERE Nome = '{}'".format(nomeDoUsuario)
+    cursor = connection.cursor()
+    cursor.execute(mySql_idUsuarioSelect_query)
+    records = cursor.fetchall()
+    idUsuarioBuscado = 0
+    if(records != []):
+      idUsuarioBuscado = int(records[0][0])
+    
+    mySql_clientHistorySelect_query = """SELECT Pedido.Data_hora, Pedido.Local_de_entrega, Pedido.ID_restaurante, Pedido.ID_pedido, Pedido.ID_Usuario
+                                         From Pedido 
+                                         WHERE Pedido.ID_Usuario = {}
+                                         ORDER BY Data_Hora DESC""".format(idUsuarioBuscado)
+    cursor = connection.cursor()
+    cursor.execute(mySql_clientHistorySelect_query)
+    records = cursor.fetchall()
+    #print(records)
 
-#def clientOrderHistory():
+    for row in records:
+      idRestaurante = int(row[2])
+      
+      mySql_restauranteNameSelect_query = "SELECT Nome FROM Restaurante WHERE ID_restaurante = {}".format(idRestaurante)
+      cursor = connection.cursor()
+      cursor.execute(mySql_restauranteNameSelect_query)
+      recordsNomeRestaurante = cursor.fetchall()
+      
+      print('\nPedido feito em:', str(recordsNomeRestaurante[0][0]))
+      print('Local entregado:', row[1])
+      print('Data:', row[0])
+
+
+  except mysql.connector.Error as error:
+    print("Failed to get record from Pedidos table {}".format(error))
+
+  finally:
+    if(records == []):
+      print("No registry")
+    if(connection.is_connected()):
+      connection.close()
+      print("MySQL connection is closed")
     
 #Insert do Usuario
 def insertUser(nome, senha, email, telefone, endereco):
@@ -559,6 +604,7 @@ def main():
     print('Digite 7 para deletar um produto de um restaurante específico')
     print('Digite 8 para mostrar um histórico dos preços médios das comidas de um restaurante específico')
     print('Digite 9 para motrar a lista do produto mais vendido')
+    print('Digite 10 para motrar o histórico de pedidos de um usuário')
 
     op = int(input())
     if (op != 0):
@@ -588,6 +634,9 @@ def main():
       if (op == 9):
         nomeDoRestaurante = input ('Nome do restaurante: ')
         showBestSellingProduct(nomeDoRestaurante)  
+      if (op == 10):
+        nomeDoUsuario = input('Nome do Usuário: ')
+        clientOrderHistory(nomeDoUsuario)
 
   print('Exiting...')
 
