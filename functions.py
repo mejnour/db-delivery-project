@@ -5,6 +5,61 @@ from mysql.connector import errorcode
 import datetime
 from collections import Counter
 
+def loginUsuario(email, senha):
+  try:
+    connection = mysql.connector.connect(host='remotemysql.com',
+                                         user="SKdTbdX8lK",
+                                         passwd="yODtLD4Q0z",
+                                         database='SKdTbdX8lK')
+
+    mySql_userSelect_query = "SELECT Email, Senha FROM Usuario WHERE Email = '{}'".format(email)
+    cursor = connection.cursor()
+    cursor.execute(mySql_userSelect_query)
+    records = cursor.fetchall()
+    #print(records)
+    isOkToProceed = False
+    if(records != []):
+      if (email == str(records[0][0]) and senha == records[0][1]):
+        isOkToProceed = True
+      else:
+        isOkToProceed = False
+
+  except mysql.connector.Error as error:
+    print("Failed to get record from Usuario table {}".format(error))
+
+  finally:
+    if(connection.is_connected()):
+      connection.close()
+      print("MySQL connection is closed")
+  return isOkToProceed
+
+def loginRestaurante(email, senha):
+  try:
+    connection = mysql.connector.connect(host='remotemysql.com',
+                                         user="SKdTbdX8lK",
+                                         passwd="yODtLD4Q0z",
+                                         database='SKdTbdX8lK')
+
+    mySql_userSelect_query = "SELECT Email, Senha FROM Restaurante WHERE Email = '{}'".format(email)
+    cursor = connection.cursor()
+    cursor.execute(mySql_userSelect_query)
+    records = cursor.fetchall()
+    #print(records)
+    isOkToProceed = False
+    if(records != []):
+      if (email == str(records[0][0]) and senha == records[0][1]):
+        isOkToProceed = True
+      else:
+        isOkToProceed = False
+
+  except mysql.connector.Error as error:
+    print("Failed to get record from Usuario table {}".format(error))
+
+  finally:
+    if(connection.is_connected()):
+      connection.close()
+      print("MySQL connection is closed")
+  return isOkToProceed
 
 #Função para mostrar todo histórico de um usuário
 def clientOrderHistory(nomeDoUsuario):
@@ -651,8 +706,21 @@ def testeInsertPedido():
 def most_frequent(List):
   occurence_count = Counter(List) 
   return occurence_count.most_common(1)[0][0]
+  
+def testeLogin(tipoDeLogin, email, senha):
+  if (tipoDeLogin == '1'):
+    boolValue = loginUsuario(email, senha)
+  if (tipoDeLogin == '2'):
+    boolValue = loginRestaurante(email, senha)
+  if (boolValue):
+    print('Login Succeeded')
+  else:
+    print('Login Failed')
 
-if __name__ == "__main__":
-  main()
+
+#if __name__ == "__main__":
+  #main()
 
 #testeInsertPedido()
+
+testeLogin('2', 'sabordonordeste@gmail.com', 'salmonella123')
