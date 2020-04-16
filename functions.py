@@ -5,6 +5,10 @@ from mysql.connector import errorcode
 import datetime
 from collections import Counter
 
+
+
+#def clientOrderHistory():
+    
 #Insert do Usuario
 def insertUser(nome, senha, email, telefone, endereco):
   #Inicialmente os parâmetros estão assim, mas podem ser modificados para ficar em outro estilo(receber tuplas ou objetos)
@@ -306,43 +310,61 @@ def showProductAverageHistory(nomeDoRestaurante):
     records = cursor.fetchall()
     idCardapioBuscado = int(records[0][0])
 
+    mySql_averageProductSelect_query = """SELECT AVG(Preco.Valor), Preco.ID_Comida, Cardapio.ID_restaurante FROM Preco 
+                                          INNER JOIN Comida ON Preco.ID_Comida = Comida.ID_Comida INNER JOIN Cardapio ON Comida.ID_cardapio = {} 
+                                          WHERE Preco.Data_hora >= DATE_ADD(CURRENT_DATE(),INTERVAL -7 DAY) AND Cardapio.ID_restaurante = {}
+                                          GROUP BY Preco.ID_Comida""".format(idCardapioBuscado, idRestauranteBuscado)
+    cursor.execute(mySql_averageProductSelect_query)
+    records = cursor.fetchall()
+    #print(records)
+
+    for row in records:
+      idAtual = row[1]
+      mySql_comidaNameSelect_query = "SELECT Nome FROM Comida WHERE ID_Comida = {}".format(idAtual)
+      cursor = connection.cursor()
+      cursor.execute(mySql_comidaNameSelect_query)
+      recordsNomeComida = cursor.fetchall()
+      print('Preço médio da comida nos últimos 7 dias: R$ %.2f' % row[0])
+      print('Nome da comida:', str(recordsNomeComida[0][0]))
+
+
   except mysql.connector.Error as error:
     print("Failed to get record into Restaurante table {}".format(error))
 
-  try:
-    mySql_idComidaSelect_query = "SELECT ID_Comida FROM Comida WHERE ID_cardapio = {}".format(idCardapioBuscado)
-    cursor = connection.cursor()
-    cursor.execute(mySql_idComidaSelect_query)
-    records = cursor.fetchall()
-    idComidaBuscada = records
-    listaDeIdComidas = []
-    for i in range(len(records)):
-      listaDeIdComidas.append(records[i][0])
-    #print(listaDeIdComidas)
+  # try:
+  #   mySql_idComidaSelect_query = "SELECT ID_Comida FROM Comida WHERE ID_cardapio = {}".format(idCardapioBuscado)
+  #   cursor = connection.cursor()
+  #   cursor.execute(mySql_idComidaSelect_query)
+  #   records = cursor.fetchall()
+  #   idComidaBuscada = records
+  #   listaDeIdComidas = []
+  #   for i in range(len(records)):
+  #     listaDeIdComidas.append(records[i][0])
+  #   #print(listaDeIdComidas)
   
-  except mysql.connector.Error as error:
-    print("Failed to get record into Comida table {}".format(error))
+  # except mysql.connector.Error as error:
+  #   print("Failed to get record into Comida table {}".format(error))
 
-  try:
-    for i in range(len(listaDeIdComidas)):
-      idAtual = int(listaDeIdComidas[i])
-      mySql_avgPrecoSelect_query = "SELECT AVG(Valor), ID_Comida from Preco WHERE ID_Comida = {} AND Data_hora >= DATE_ADD(CURRENT_DATE(),INTERVAL -7 DAY) GROUP BY ID_Comida".format(idAtual)
-      cursor = connection.cursor()
-      cursor.execute(mySql_avgPrecoSelect_query)
-      records = cursor.fetchall()
+  # try:
+  #   for i in range(len(listaDeIdComidas)):
+  #     idAtual = int(listaDeIdComidas[i])
+  #     mySql_avgPrecoSelect_query = "SELECT AVG(Valor), ID_Comida from Preco WHERE ID_Comida = {} AND Data_hora >= DATE_ADD(CURRENT_DATE(),INTERVAL -7 DAY) GROUP BY ID_Comida".format(idAtual)
+  #     cursor = connection.cursor()
+  #     cursor.execute(mySql_avgPrecoSelect_query)
+  #     records = cursor.fetchall()
       
-      for row in records:
-        mySql_idComidaSelect_query = "SELECT Nome FROM Comida WHERE ID_Comida = {}".format(row[1])
-        cursor = connection.cursor()
-        cursor.execute(mySql_idComidaSelect_query)
-        recordsNomeComida = cursor.fetchall()
-        nomeDaComida = str(recordsNomeComida[0][0])
-        print('\n----Produtos Do Restaurante----')
-        print('\nNome do Produto:', nomeDaComida)
-        print('Preço médio dele nos últimos 7 dias: R$:', row[0])
+  #     for row in records:
+  #       mySql_idComidaSelect_query = "SELECT Nome FROM Comida WHERE ID_Comida = {}".format(row[1])
+  #       cursor = connection.cursor()
+  #       cursor.execute(mySql_idComidaSelect_query)
+  #       recordsNomeComida = cursor.fetchall()
+  #       nomeDaComida = str(recordsNomeComida[0][0])
+  #       print('\n----Produtos Do Restaurante----')
+  #       print('\nNome do Produto:', nomeDaComida)
+  #       print('Preço médio dele nos últimos 7 dias: R$:', row[0])
   
-  except mysql.connector.Error as error:
-    print("Failed to get record into Preco table {}".format(error))
+  # except mysql.connector.Error as error:
+  #   print("Failed to get record into Preco table {}".format(error))
   
   finally:
     if(connection.is_connected()):

@@ -1,6 +1,6 @@
-import curses
+#import curses
 import functions as fn
-from curses import wrapper
+#from curses import wrapper
 
 def cadastro():
     sel = None
