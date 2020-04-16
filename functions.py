@@ -402,65 +402,102 @@ def showProductsFromRestaurant(restaurante):
 
       #Mostra a comida com a maior quantidade de pedidos
 
+#Função para mostrar comida mais pedida
 def showBestSellingProduct(nomeDoRestaurante):
 
+  #def junk():
+    # try:
+    #   connection = mysql.connector.connect(host='remotemysql.com',
+    #                                        user="SKdTbdX8lK",
+    #                                        passwd="yODtLD4Q0z",
+    #                                        database='SKdTbdX8lK')
+
+    #   mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(nomeDoRestaurante)
+    #   cursor = connection.cursor()
+    #   cursor.execute(mySql_idRestauranteSelect_query)
+    #   records = cursor.fetchall()
+    #   idRestauranteBuscado = int(records[0][0])
+
+    # except mysql.connector.Error as error:
+    #   print("Failed to get record into Restaurante table {}".format(error))
+
+    # try:
+    #   mySql_idPedidoSelect_query = "SELECT ID_Pedido FROM Pedido WHERE ID_restaurante = {}".format(idRestauranteBuscado)
+    #   cursor = connection.cursor()
+    #   cursor.execute(mySql_idPedidoSelect_query)
+    #   records = cursor.fetchall()
+    #   listaDeIdPedidos = []
+    #   for i in range(len(records)):
+    #     listaDeIdPedidos.append(records[i][0])
+    #   #print(listaDeIdPedidos)
+      
+    #   listaDeIdComidas = []
+    #   for i in range(len(listaDeIdPedidos)):
+    #     mySql_idComidaSelect_query = "SELECT ID_Comida FROM PedidoContemComida WHERE ID_pedido = {}".format(int(listaDeIdPedidos[i]))
+    #     cursor = connection.cursor()
+    #     cursor.execute(mySql_idComidaSelect_query)
+    #     records = cursor.fetchall()
+    #     #print(records)
+    #     #print(int(records[i][0]))
+    #     for i in range(len(records)):
+    #       listaDeIdComidas.append(int(records[i][0]))
+      
+    #   idComidaMaisVendido = int(most_frequent(listaDeIdComidas))
+    #   #print(most_frequent(listaDeIdComidas))
+
+    #   mySql_infoComidaSelect_query = "SELECT * FROM Comida WHERE ID_Comida = {}".format(idComidaMaisVendido)
+    #   cursor = connection.cursor()
+    #   cursor.execute(mySql_infoComidaSelect_query)
+    #   records = cursor.fetchall()
+    #   print('---Comida Mais Vendida do Restaurante: ' + nomeDoRestaurante + '---')
+    #   for row in records:
+    #     print('Nome: ', row[1])
+    #     print('Descrição: ', row[2])
+    #     print('Categoria: ', row[4])
+    
+    # except mysql.connector.Error as error:
+    #   print("Failed to get record into Comida table {}".format(error))
+    
+    # finally:
+    #   if(connection.is_connected()):
+    #     cursor.close()
+    #     connection.close()
+    #     print("MySQL connection is closed")      
+  
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
                                          user="SKdTbdX8lK",
                                          passwd="yODtLD4Q0z",
                                          database='SKdTbdX8lK')
-
+    
     mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(nomeDoRestaurante)
     cursor = connection.cursor()
     cursor.execute(mySql_idRestauranteSelect_query)
     records = cursor.fetchall()
     idRestauranteBuscado = int(records[0][0])
 
-  except mysql.connector.Error as error:
-    print("Failed to get record into Restaurante table {}".format(error))
-
-  try:
-    mySql_idPedidoSelect_query = "SELECT ID_Pedido FROM Pedido WHERE ID_restaurante = {}".format(idRestauranteBuscado)
+    mySql_bestSellingSelect_query = """SELECT r.nome as Restaurante, c.Nome, COUNT(*) as quantity FROM Restaurante r JOIN Pedido p ON r.ID_Restaurante = p.ID_Restaurante JOIN PedidoContemComida pc ON pc.ID_Pedido = p.ID_Pedido JOIN Comida c ON pc.ID_Comida = c.ID_Comida
+                                       WHERE r.ID_Restaurante = {}
+                                       GROUP BY Restaurante, c.Nome
+                                       ORDER BY quantity DESC
+                                       LIMIT 1""".format(idRestauranteBuscado)
     cursor = connection.cursor()
-    cursor.execute(mySql_idPedidoSelect_query)
+    cursor.execute(mySql_bestSellingSelect_query)
     records = cursor.fetchall()
-    listaDeIdPedidos = []
-    for i in range(len(records)):
-      listaDeIdPedidos.append(records[i][0])
-    #print(listaDeIdPedidos)
-    
-    listaDeIdComidas = []
-    for i in range(len(listaDeIdPedidos)):
-      mySql_idComidaSelect_query = "SELECT ID_Comida FROM PedidoContemComida WHERE ID_pedido = {}".format(int(listaDeIdPedidos[i]))
-      cursor = connection.cursor()
-      cursor.execute(mySql_idComidaSelect_query)
-      records = cursor.fetchall()
-      #print(records)
-      #print(int(records[i][0]))
-      for i in range(len(records)):
-        listaDeIdComidas.append(int(records[i][0]))
-    
-    idComidaMaisVendido = int(most_frequent(listaDeIdComidas))
-    #print(most_frequent(listaDeIdComidas))
-
-    mySql_infoComidaSelect_query = "SELECT * FROM Comida WHERE ID_Comida = {}".format(idComidaMaisVendido)
-    cursor = connection.cursor()
-    cursor.execute(mySql_infoComidaSelect_query)
-    records = cursor.fetchall()
-    print('---Comida Mais Vendida do Restaurante: ' + nomeDoRestaurante + '---')
+    #print(records)
     for row in records:
-      print('Nome: ', row[1])
-      print('Descrição: ', row[2])
-      print('Categoria: ', row[4])
+      #print('Nome do restaurante:', row[0])
+      print('Nome da comida:', row[1])
+      print('Quantidade Vendida no total:', row[2])
   
   except mysql.connector.Error as error:
-    print("Failed to get record into Comida table {}".format(error))
-  
+    print("Failed to get record into PedidoContemComida table {}".format(error))
+    
   finally:
     if(connection.is_connected()):
       cursor.close()
       connection.close()
-      print("MySQL connection is closed")      
+      print("MySQL connection is closed")
 
 #TODO Ao selecionar comida, retornar restaurantes que vendem
 def showRestaurantsWithProduct(comida):
