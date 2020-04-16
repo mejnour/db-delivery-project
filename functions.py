@@ -675,6 +675,7 @@ def most_frequent(List):
   occurence_count = Counter(List) 
   return occurence_count.most_common(1)[0][0]
 
-main()
+if __name__ == "__main__":
+  main()
 
 #testeInsertPedido()
