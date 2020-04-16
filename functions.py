@@ -18,11 +18,13 @@ def clientOrderHistory(nomeDoUsuario):
     cursor = connection.cursor()
     cursor.execute(mySql_idUsuarioSelect_query)
     records = cursor.fetchall()
-    idUsuarioBuscado = int(records[0][0])
+    idUsuarioBuscado = 0
+    if(records != []):
+      idUsuarioBuscado = int(records[0][0])
     
-    mySql_clientHistorySelect_query = """SELECT Pedido.Data_hora, Pedido.Local_de_entrega, Pedido.ID_restaurante, Pedido.ID_pedido 
+    mySql_clientHistorySelect_query = """SELECT Pedido.Data_hora, Pedido.Local_de_entrega, Pedido.ID_restaurante, Pedido.ID_pedido, Pedido.ID_Usuario
                                          From Pedido 
-                                         INNER JOIN Usuario ON Usuario.ID_Usuario = {} 
+                                         WHERE Pedido.ID_Usuario = {}
                                          ORDER BY Data_Hora DESC""".format(idUsuarioBuscado)
     cursor = connection.cursor()
     cursor.execute(mySql_clientHistorySelect_query)
@@ -46,6 +48,8 @@ def clientOrderHistory(nomeDoUsuario):
     print("Failed to get record from Pedidos table {}".format(error))
 
   finally:
+    if(records == []):
+      print("No registry")
     if(connection.is_connected()):
       connection.close()
       print("MySQL connection is closed")
