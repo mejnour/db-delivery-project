@@ -533,99 +533,99 @@ def showProductAverageHistory(emailDoRestaurante):
 def showProductsFromRestaurant(nomeRestaurante = None, emailDoRestaurante = None):
   if nomeRestaurante is not None:
     try:
-    connection = mysql.connector.connect(host='remotemysql.com',
+      connection = mysql.connector.connect(host='remotemysql.com',
                                          user="SKdTbdX8lK",
                                          passwd="yODtLD4Q0z",
                                          database='SKdTbdX8lK')
-    mySql_idSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(restaurante)
-    cursor = connection.cursor()
-    cursor.execute(mySql_idSelect_query)
-    records = cursor.fetchall()
-    idRestauranteBuscado = int(records[0][0])
-    #print(idRestauranteBuscado)
-
-    mySql_cardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
-    cursor.execute(mySql_cardapioSelect_query)
-    records = cursor.fetchall()
-    idCardapioBuscado = int(records[0][0])
-    #print(idCardapioBuscado)
-    
-    mySql_contemSelect_query = "SELECT * FROM Contem WHERE ID_cardapio = {}".format(idCardapioBuscado)
-    cursor.execute(mySql_contemSelect_query)
-    records = cursor.fetchall()
-    listaDeIdComidas = []
-    for row in records:
-      listaDeIdComidas.append(row[1])
-    for i in range(len(listaDeIdComidas)):
-      mySql_comidaSelect_query = "SELECT * FROM Comida WHERE ID_Comida = {}".format(listaDeIdComidas[i])
-      cursor.execute(mySql_comidaSelect_query)
+      mySql_idSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(nomeRestaurante)
+      cursor = connection.cursor()
+      cursor.execute(mySql_idSelect_query)
       records = cursor.fetchall()
-      for row in records:
-        print('\nNome do Produto:', row[1])
-        print('Categoria:', row[4])
-        print('Descrição:', row[2])        
-        mySql_precoSelect_query = "SELECT Valor FROM Preco WHERE ID_Comida = {}".format(listaDeIdComidas[i])
-        cursor.execute(mySql_precoSelect_query)
-        precoRecords = cursor.fetchall()
-        print('Preço: R${}'.format(float(precoRecords[0][0])))
-  
-  except mysql.connector.Error as error:
-    print("Failed to get record into Restaurante table {}".format(error))
+      idRestauranteBuscado = int(records[0][0])
+      #print(idRestauranteBuscado)
 
-  finally:
-    if(connection.is_connected()):
-      cursor.close()
-      connection.close()
-      print("MySQL connection is closed")
-      return
+      mySql_cardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
+      cursor.execute(mySql_cardapioSelect_query)
+      records = cursor.fetchall()
+      idCardapioBuscado = int(records[0][0])
+      #print(idCardapioBuscado)
+      
+      mySql_contemSelect_query = "SELECT * FROM Contem WHERE ID_cardapio = {}".format(idCardapioBuscado)
+      cursor.execute(mySql_contemSelect_query)
+      records = cursor.fetchall()
+      listaDeIdComidas = []
+      for row in records:
+        listaDeIdComidas.append(row[1])
+      for i in range(len(listaDeIdComidas)):
+        mySql_comidaSelect_query = "SELECT * FROM Comida WHERE ID_Comida = {}".format(listaDeIdComidas[i])
+        cursor.execute(mySql_comidaSelect_query)
+        records = cursor.fetchall()
+        for row in records:
+          print('\nNome do Produto:', row[1])
+          print('Categoria:', row[4])
+          print('Descrição:', row[2])        
+          mySql_precoSelect_query = "SELECT Valor FROM Preco WHERE ID_Comida = {}".format(listaDeIdComidas[i])
+          cursor.execute(mySql_precoSelect_query)
+          precoRecords = cursor.fetchall()
+          print('Preço: R${}'.format(float(precoRecords[0][0])))
+  
+    except mysql.connector.Error as error:
+      print("Failed to get record into Restaurante table {}".format(error))
+
+    finally:
+      if(connection.is_connected()):
+        cursor.close()
+        connection.close()
+        print("MySQL connection is closed")
+        return
 
   elif emailDoRestaurante is not None:
     try:
-    connection = mysql.connector.connect(host='remotemysql.com',
-                                         user="SKdTbdX8lK",
-                                         passwd="yODtLD4Q0z",
-                                         database='SKdTbdX8lK')
-    mySql_idSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Email = '{}'".format(emailDoRestaurante)
-    cursor = connection.cursor()
-    cursor.execute(mySql_idSelect_query)
-    records = cursor.fetchall()
-    idRestauranteBuscado = int(records[0][0])
-    #print(idRestauranteBuscado)
-
-    mySql_cardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
-    cursor.execute(mySql_cardapioSelect_query)
-    records = cursor.fetchall()
-    idCardapioBuscado = int(records[0][0])
-    #print(idCardapioBuscado)
-    
-    mySql_contemSelect_query = "SELECT * FROM Contem WHERE ID_cardapio = {}".format(idCardapioBuscado)
-    cursor.execute(mySql_contemSelect_query)
-    records = cursor.fetchall()
-    listaDeIdComidas = []
-    for row in records:
-      listaDeIdComidas.append(row[1])
-    for i in range(len(listaDeIdComidas)):
-      mySql_comidaSelect_query = "SELECT * FROM Comida WHERE ID_Comida = {}".format(listaDeIdComidas[i])
-      cursor.execute(mySql_comidaSelect_query)
+      connection = mysql.connector.connect(host='remotemysql.com',
+                                          user="SKdTbdX8lK",
+                                          passwd="yODtLD4Q0z",
+                                          database='SKdTbdX8lK')
+      mySql_idSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Email = '{}'".format(emailDoRestaurante)
+      cursor = connection.cursor()
+      cursor.execute(mySql_idSelect_query)
       records = cursor.fetchall()
-      for row in records:
-        print('\nNome do Produto:', row[1])
-        print('Categoria:', row[4])
-        print('Descrição:', row[2])        
-        mySql_precoSelect_query = "SELECT Valor FROM Preco WHERE ID_Comida = {}".format(listaDeIdComidas[i])
-        cursor.execute(mySql_precoSelect_query)
-        precoRecords = cursor.fetchall()
-        print('Preço: R${}'.format(float(precoRecords[0][0])))
-  
-  except mysql.connector.Error as error:
-    print("Failed to get record into Restaurante table {}".format(error))
+      idRestauranteBuscado = int(records[0][0])
+      #print(idRestauranteBuscado)
 
-  finally:
-    if(connection.is_connected()):
-      cursor.close()
-      connection.close()
-      print("MySQL connection is closed")
-      return  
+      mySql_cardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
+      cursor.execute(mySql_cardapioSelect_query)
+      records = cursor.fetchall()
+      idCardapioBuscado = int(records[0][0])
+      #print(idCardapioBuscado)
+      
+      mySql_contemSelect_query = "SELECT * FROM Contem WHERE ID_cardapio = {}".format(idCardapioBuscado)
+      cursor.execute(mySql_contemSelect_query)
+      records = cursor.fetchall()
+      listaDeIdComidas = []
+      for row in records:
+        listaDeIdComidas.append(row[1])
+      for i in range(len(listaDeIdComidas)):
+        mySql_comidaSelect_query = "SELECT * FROM Comida WHERE ID_Comida = {}".format(listaDeIdComidas[i])
+        cursor.execute(mySql_comidaSelect_query)
+        records = cursor.fetchall()
+        for row in records:
+          print('\nNome do Produto:', row[1])
+          print('Categoria:', row[4])
+          print('Descrição:', row[2])        
+          mySql_precoSelect_query = "SELECT Valor FROM Preco WHERE ID_Comida = {}".format(listaDeIdComidas[i])
+          cursor.execute(mySql_precoSelect_query)
+          precoRecords = cursor.fetchall()
+          print('Preço: R${}'.format(float(precoRecords[0][0])))
+    
+    except mysql.connector.Error as error:
+      print("Failed to get record into Restaurante table {}".format(error))
+
+    finally:
+      if(connection.is_connected()):
+        cursor.close()
+        connection.close()
+        print("MySQL connection is closed")
+        return  
   
 #Função para mostrar comida mais pedida
 def showBestSellingProduct(emailDoRestaurante):
@@ -812,8 +812,8 @@ def main():
         categoria, nome, senha, email, telefone, endereco, tipoDeEntrega = askRestaurantInput()
         insertRestaurant(categoria, nome, senha, email, telefone, endereco, tipoDeEntrega)
       if (op == 3):
-        nomeRestaurante = input("Nome do restaurante: ")
-        showProductsFromRestaurant(nomeRestaurante)
+        nomeDoRestaurante = input("Nome do restaurante: ")
+        showProductsFromRestaurant(nomeDoRestaurante, None)
       if (op == 4):
         showCategories()
       if (op == 5):
@@ -864,8 +864,8 @@ def testeLogin(tipoDeLogin, email, senha):
     print('Login Failed')
 
 
-# if __name__ == "__main__":
-#   main()
+if __name__ == "__main__":
+  main()
 
 #testeInsertPedido()
 
