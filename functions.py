@@ -62,14 +62,14 @@ def loginRestaurante(email, senha):
   return isOkToProceed
 
 #Função para mostrar todo histórico de um usuário 
-def clientOrderHistory(nomeDoUsuario, email):
+def clientOrderHistory(email):
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
                                          user="SKdTbdX8lK",
                                          passwd="yODtLD4Q0z",
                                          database='SKdTbdX8lK')
     
-    mySql_idUsuarioSelect_query = "SELECT ID_Usuario FROM Usuario WHERE Nome = '{}' AND Email = '{}'".format(nomeDoUsuario, email)
+    mySql_idUsuarioSelect_query = "SELECT ID_Usuario FROM Usuario WHERE Email = '{}'".format(nomeDoUsuario, email)
     cursor = connection.cursor()
     cursor.execute(mySql_idUsuarioSelect_query)
     records = cursor.fetchall()
@@ -103,8 +103,6 @@ def clientOrderHistory(nomeDoUsuario, email):
     print("Failed to get record from Pedidos table {}".format(error))
 
   finally:
-    if(records == []):
-      print("No registry")
     if(connection.is_connected()):
       connection.close()
       print("MySQL connection is closed")
@@ -461,35 +459,33 @@ def showProductsFromRestaurant(restaurante):
     cursor = connection.cursor()
     cursor.execute(mySql_idSelect_query)
     records = cursor.fetchall()
-    if (len(records) > 1):
-      for z in range(len(records)): 
-        idRestauranteBuscado = int(records[z][0])
-        #print(idRestauranteBuscado)
+    idRestauranteBuscado = int(records[0][0])
+    #print(idRestauranteBuscado)
 
-        mySql_cardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
-        cursor.execute(mySql_cardapioSelect_query)
-        records = cursor.fetchall()
-        idCardapioBuscado = int(records[0][0])
-        #print(idCardapioBuscado)
-        
-        mySql_contemSelect_query = "SELECT * FROM Contem WHERE ID_cardapio = {}".format(idCardapioBuscado)
-        cursor.execute(mySql_contemSelect_query)
-        records = cursor.fetchall()
-        listaDeIdComidas = []
-        for row in records:
-          listaDeIdComidas.append(row[1])
-        for i in range(len(listaDeIdComidas)):
-          mySql_comidaSelect_query = "SELECT * FROM Comida WHERE ID_Comida = {}".format(listaDeIdComidas[i])
-          cursor.execute(mySql_comidaSelect_query)
-          records = cursor.fetchall()
-          for row in records:
-            print('\nNome do Produto:', row[1])
-            print('Categoria:', row[4])
-            print('Descrição:', row[2])        
-            mySql_precoSelect_query = "SELECT Valor FROM Preco WHERE ID_Comida = {}".format(listaDeIdComidas[i])
-            cursor.execute(mySql_precoSelect_query)
-            precoRecords = cursor.fetchall()
-            print('Preço: R${}'.format(float(precoRecords[0][0])))
+    mySql_cardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
+    cursor.execute(mySql_cardapioSelect_query)
+    records = cursor.fetchall()
+    idCardapioBuscado = int(records[0][0])
+    #print(idCardapioBuscado)
+    
+    mySql_contemSelect_query = "SELECT * FROM Contem WHERE ID_cardapio = {}".format(idCardapioBuscado)
+    cursor.execute(mySql_contemSelect_query)
+    records = cursor.fetchall()
+    listaDeIdComidas = []
+    for row in records:
+      listaDeIdComidas.append(row[1])
+    for i in range(len(listaDeIdComidas)):
+      mySql_comidaSelect_query = "SELECT * FROM Comida WHERE ID_Comida = {}".format(listaDeIdComidas[i])
+      cursor.execute(mySql_comidaSelect_query)
+      records = cursor.fetchall()
+      for row in records:
+        print('\nNome do Produto:', row[1])
+        print('Categoria:', row[4])
+        print('Descrição:', row[2])        
+        mySql_precoSelect_query = "SELECT Valor FROM Preco WHERE ID_Comida = {}".format(listaDeIdComidas[i])
+        cursor.execute(mySql_precoSelect_query)
+        precoRecords = cursor.fetchall()
+        print('Preço: R${}'.format(float(precoRecords[0][0])))
   
   except mysql.connector.Error as error:
     print("Failed to get record into Restaurante table {}".format(error))
