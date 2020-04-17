@@ -1,6 +1,21 @@
 import functions as fn
 
+def historico(usuarioEmail):
+
+    '''
+    Esta função é responsável por exibir o historico do usuário.
+    '''
+
+    fn.clientOrderHistory(usuarioEmail)
+
+
 def pesquisar():
+
+    '''
+    Esta função é responsável pesquisar por restaurantes, comidas
+    e categorias.
+    '''
+
     categoria = None
     restaurante = None
     comida = None
@@ -34,12 +49,19 @@ def pesquisar():
             # categoria = input('Nome da categoria:\n> ')
             fn.showCategories()
         elif optionPesq is 0:
+
             break
         else:
             print('Entrada inválida. Tente novamente.')
             break
 
 def autentica():
+    
+    '''
+    Esta função é responsável pela autenticação dos usuários.
+    '''
+
+    isRestaurant = False
     userEmail = None
     userPass = None
     while 1:
@@ -54,9 +76,26 @@ def autentica():
 
         print('\n')
 
-        # if userEmail is '0':
-        #     break
-        # chama função que autentica
+        try:
+            authUser = fn.loginUsuario(userEmail, userPass)
+            print(auth)
+        except:
+            pass
+
+        try:
+            authRest = fn.loginRestaurante(userEmail, userPass)
+            print(auth)
+        except:
+            pass
+
+        if authUser is True:
+            isRestaurant = False
+            return userEmail, isRestaurant
+        elif authRest is True:
+            isRestaurant = True
+            return userEmail, isRestaurant
+        else:
+            continue
 
         break
 
@@ -104,6 +143,8 @@ def mainCLI():
     print('\t \t Bem-vindo ao iDOOM')
     print('- The only one that rips and tears your hunger! -')
 
+    loggedEmail = None
+    isRest = None
     option = None
     while 1:
         print('- - - - - - - - - - - -')
@@ -131,21 +172,20 @@ def mainCLI():
 
         print('\n')
 
-        if option is 1:
-            cadastro()
+        if loggedEmail == None:
+            if option is 1:
+                cadastro()
         elif option is 2:
-            autentica()
+            loggedEmail, isRest = autentica()
         elif option is 3:
             pesquisar()
         elif option is 4:
-            pass
+            historico(loggedEmail)
         elif option is 0:
             break
         else:
             print('Entrada inválida. Tente novamente')
             continue
-
-        
 
 
 if __name__ == '__main__':
