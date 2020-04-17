@@ -61,15 +61,15 @@ def loginRestaurante(email, senha):
       print("MySQL connection is closed")
   return isOkToProceed
 
-#Função para mostrar todo histórico de um usuário
-def clientOrderHistory(nomeDoUsuario):
+#Função para mostrar todo histórico de um usuário 
+def clientOrderHistory(nomeDoUsuario, email):
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
                                          user="SKdTbdX8lK",
                                          passwd="yODtLD4Q0z",
                                          database='SKdTbdX8lK')
     
-    mySql_idUsuarioSelect_query = "SELECT ID_Usuario FROM Usuario WHERE Nome = '{}'".format(nomeDoUsuario)
+    mySql_idUsuarioSelect_query = "SELECT ID_Usuario FROM Usuario WHERE Nome = '{}' AND Email = '{}'".format(nomeDoUsuario, email)
     cursor = connection.cursor()
     cursor.execute(mySql_idUsuarioSelect_query)
     records = cursor.fetchall()
@@ -190,7 +190,7 @@ def insertRestaurant(categoria, nome, senha, email, telefone, endereco, tipoDeEn
       connection.close()
       print("MySQL connection is closed")
 
-#Inserir produto
+#Inserir produto TODO
 def insertProduct(restaurante ,nome, descricao, categoria, preco):
   #Consulta
   try:
@@ -270,7 +270,7 @@ def insertProduct(restaurante ,nome, descricao, categoria, preco):
       connection.close()
       print("MySQL connection is closed")
 
-#Função de inserir na tabela Pedido
+#Função de inserir na tabela Pedido TODO
 def insertPedido(nomeUsuario, nomeRestaurante, enderecoDeEntrega, listaDeIdComidas):
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
@@ -344,7 +344,7 @@ def insertPedido(nomeUsuario, nomeRestaurante, enderecoDeEntrega, listaDeIdComid
       connection.close()
       print("MySQL connection is closed")
 
-#Função para deletar produto das tabelas Preco, Contem e Comida utilizando nome do restaurante e do produto
+#TODO Função para deletar produto das tabelas Preco, Contem e Comida utilizando nome do restaurante e do produto
 def deleteProduct(nomeDoRestaurante,nomeDaComida):
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
@@ -392,7 +392,7 @@ def deleteProduct(nomeDoRestaurante,nomeDaComida):
       connection.close()
       print("MySQL connection is closed")
 
-#Retorna o preço médio de cada comida vendida nos 7 dias anteriores
+#TODO Retorna o preço médio de cada comida vendida nos 7 dias anteriores
 def showProductAverageHistory(nomeDoRestaurante):
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
@@ -437,7 +437,7 @@ def showProductAverageHistory(nomeDoRestaurante):
       connection.close()
       print("MySQL connection is closed")
 
-#Função para mostrar as comidas de um restaurante
+#TODO Função para mostrar as comidas de um restaurante
 def showProductsFromRestaurant(restaurante):
 
   try:
@@ -490,7 +490,7 @@ def showProductsFromRestaurant(restaurante):
       #Mostra a comida com a maior quantidade de pedidos
 
 #Função para mostrar comida mais pedida
-def showBestSellingProduct(nomeDoRestaurante):
+def showBestSellingProduct(nomeDoRestaurante, email):
 
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
@@ -498,11 +498,13 @@ def showBestSellingProduct(nomeDoRestaurante):
                                          passwd="yODtLD4Q0z",
                                          database='SKdTbdX8lK')
     
-    mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(nomeDoRestaurante)
+    mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}' AND Email = '{}'".format(nomeDoRestaurante, email)
     cursor = connection.cursor()
     cursor.execute(mySql_idRestauranteSelect_query)
     records = cursor.fetchall()
-    idRestauranteBuscado = int(records[0][0])
+    idRestauranteBuscado = 0
+    if (records != []):
+      idRestauranteBuscado = int(records[0][0])
 
     mySql_bestSellingSelect_query = """SELECT r.nome as Restaurante, c.Nome, COUNT(*) as quantity FROM Restaurante r JOIN Pedido p ON r.ID_Restaurante = p.ID_Restaurante JOIN PedidoContemComida pc ON pc.ID_Pedido = p.ID_Pedido JOIN Comida c ON pc.ID_Comida = c.ID_Comida
                                        WHERE r.ID_Restaurante = {}
@@ -512,11 +514,12 @@ def showBestSellingProduct(nomeDoRestaurante):
     cursor = connection.cursor()
     cursor.execute(mySql_bestSellingSelect_query)
     records = cursor.fetchall()
-    #print(records)
-    for row in records:
-      #print('Nome do restaurante:', row[0])
-      print('Nome da comida:', row[1])
-      print('Quantidade Vendida no total:', row[2])
+    if (records != []):
+      #print(records)
+      for row in records:
+        #print('Nome do restaurante:', row[0])
+        print('\nNome da comida:', row[1])
+        print('Quantidade Vendida no total:', row[2])
   
   except mysql.connector.Error as error:
     print("Failed to get record into PedidoContemComida table {}".format(error))
@@ -688,10 +691,12 @@ def main():
         showProductAverageHistory(nomeDoRestaurante)
       if (op == 9):
         nomeDoRestaurante = input ('Nome do restaurante: ')
-        showBestSellingProduct(nomeDoRestaurante)  
+        emailDoRestaurante = input('Email do restaurante: ')
+        showBestSellingProduct(nomeDoRestaurante, emailDoRestaurante)  
       if (op == 10):
         nomeDoUsuario = input('Nome do Usuário: ')
-        clientOrderHistory(nomeDoUsuario)
+        emailDoUsuario = input('Email do Usuário: ')
+        clientOrderHistory(nomeDoUsuario, emailDoUsuario)
 
   print('Exiting...')
 
@@ -718,9 +723,9 @@ def testeLogin(tipoDeLogin, email, senha):
     print('Login Failed')
 
 
-#if __name__ == "__main__":
-  #main()
+if __name__ == "__main__":
+  main()
 
 #testeInsertPedido()
 
-testeLogin('2', 'sabordonordeste@gmail.com', 'salmonella123')
+#testeLogin('2', 'sabordonordeste@gmail.com', 'salmonella123')
