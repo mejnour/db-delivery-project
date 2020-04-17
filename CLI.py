@@ -172,9 +172,8 @@ def mainCLI():
 
         print('\n')
 
-        if loggedEmail == None:
-            if option is 1:
-                cadastro()
+        if loggedEmail is None and option is 1:
+            cadastro()
         elif option is 2:
             loggedEmail, isRest = autentica()
         elif option is 3:
