@@ -5,7 +5,10 @@ def historico(usuarioEmail):
     '''
     Esta função é responsável por exibir o historico do usuário.
     '''
-
+   
+    print('- - - - - - - - - - - - - - - - - - - -')
+    print('H I S T O R I C O   D E   P E D I D O S')
+    print('- - - - - - - - - - - - - - - - - - - -')
     fn.clientOrderHistory(usuarioEmail)
 
 
@@ -65,6 +68,9 @@ def autentica():
     userEmail = None
     userPass = None
     while 1:
+        print('- - - - - - - - - - - -')
+        print('A U T E N T I C A C A O')
+        print('- - - - - - - - - - - -')
 
         print('Entre com seu e-mail ou digite 0 para voltar:')
         userEmail = input('> ')
@@ -78,13 +84,11 @@ def autentica():
 
         try:
             authUser = fn.loginUsuario(userEmail, userPass)
-            print(auth)
         except:
             pass
 
         try:
             authRest = fn.loginRestaurante(userEmail, userPass)
-            print(auth)
         except:
             pass
 
@@ -151,7 +155,10 @@ def mainCLI():
         print('M E N U   I N I C I A L')
         print('- - - - - - - - - - - -')
         print('Digite 0 para sair do iDOOM')
-        print('Digite 1 para cadastrar-se')
+
+        if loggedEmail is None:
+            print('Digite 1 para cadastrar-se')
+
         print('Digite 2 para entrar')
         print('Digite 3 para pesquisar')
         print('Digite 4 para consultar o histórico de pedidos')
