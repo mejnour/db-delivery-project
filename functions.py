@@ -190,8 +190,8 @@ def insertRestaurant(categoria, nome, senha, email, telefone, endereco, tipoDeEn
       connection.close()
       print("MySQL connection is closed")
 
-#Inserir produto TODO
-def insertProduct(restaurante ,nome, descricao, categoria, preco):
+#Inserir produto 
+def insertProduct(restaurante, email, nome, descricao, categoria, preco):
   #Consulta
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
@@ -202,14 +202,16 @@ def insertProduct(restaurante ,nome, descricao, categoria, preco):
     cursor = connection.cursor()
     cursor.execute(mySql_idSelect_query)
     records = cursor.fetchall()
-    idRestauranteBuscado = int(records[0][0])
-    #print(idRestauranteBuscado)
+    if (records != []):
+      idRestauranteBuscado = int(records[0][0])
+      #print(idRestauranteBuscado)
 
     mySql_cardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
     cursor.execute(mySql_cardapioSelect_query)
     records = cursor.fetchall()
-    idCardapioBuscado = int(records[0][0])
-    #print(idCardapioBuscado)
+    if (records != []):
+      idCardapioBuscado = int(records[0][0])
+      #print(idCardapioBuscado)
   except mysql.connector.Error as error:
     print("Failed to get record into Restaurante table {}".format(error))
 
@@ -270,27 +272,31 @@ def insertProduct(restaurante ,nome, descricao, categoria, preco):
       connection.close()
       print("MySQL connection is closed")
 
-#Função de inserir na tabela Pedido TODO
-def insertPedido(nomeUsuario, nomeRestaurante, enderecoDeEntrega, listaDeIdComidas):
+#Função de inserir na tabela Pedido 
+def insertPedido(nomeUsuario, nomeRestaurante, email, enderecoDeEntrega, listaDeIdComidas):
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
                                          user="SKdTbdX8lK",
                                          passwd="yODtLD4Q0z",
                                          database='SKdTbdX8lK')
     
-    mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(nomeRestaurante)
+    mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}' AND Email = '{}'".format(nomeRestaurante, email)
     cursor = connection.cursor()
     cursor.execute(mySql_idRestauranteSelect_query)
     records = cursor.fetchall()
-    idRestauranteBuscado = int(records[0][0])
-    #print(idRestauranteBuscado)
+    idRestauranteBuscado = 0
+    if (records != []):
+      idRestauranteBuscado = int(records[0][0])
+      print(idRestauranteBuscado)
 
     mySql_idUsuarioSelect_query = "SELECT ID_Usuario FROM Usuario WHERE Nome = '{}'".format(nomeUsuario)
     cursor = connection.cursor()
     cursor.execute(mySql_idUsuarioSelect_query)
     records = cursor.fetchall()
-    idUsuarioBuscado = int(records[0][0])
-    #print(idRestauranteBuscado)
+    idUsuarioBuscado = 0
+    if (records != []):
+      idUsuarioBuscado = int(records[0][0])
+      print(idUsuarioBuscado)
     
     dataDePedidoFeito = datetime.datetime.now()
     formattedDate = dataDePedidoFeito.strftime('%Y-%m-%d %H:%M:%S')
@@ -322,8 +328,10 @@ def insertPedido(nomeUsuario, nomeRestaurante, enderecoDeEntrega, listaDeIdComid
     cursor = connection.cursor()
     cursor.execute(mySql_idPedidoSelect_query)
     records = cursor.fetchall()
-    idPedidoFeito = int(records[0][0])
-    #print(idRestauranteBuscado)
+    idPedidoFeito = 0
+    if (records != []):
+      idPedidoFeito = int(records[0][0])
+      #print(idRestauranteBuscado)
     
     for i in range(len(listaDeIdComidas)):
       idComidaAtual = int(listaDeIdComidas[i])
@@ -344,29 +352,32 @@ def insertPedido(nomeUsuario, nomeRestaurante, enderecoDeEntrega, listaDeIdComid
       connection.close()
       print("MySQL connection is closed")
 
-#TODO Função para deletar produto das tabelas Preco, Contem e Comida utilizando nome do restaurante e do produto
-def deleteProduct(nomeDoRestaurante,nomeDaComida):
+#Função para deletar produto das tabelas Preco, Contem e Comida utilizando nome do restaurante e do produto
+def deleteProduct(nomeDoRestaurante,nomeDaComida, email):
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
                                         user="SKdTbdX8lK",
                                         passwd="yODtLD4Q0z",
                                         database='SKdTbdX8lK')
 
-    mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(nomeDoRestaurante)
+    mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}' AND Email = '{}'".format(nomeDoRestaurante, email)
     cursor = connection.cursor()
     cursor.execute(mySql_idRestauranteSelect_query)
     records = cursor.fetchall()
-    idRestauranteBuscado = int(records[0][0])
+    if (records != []):
+      idRestauranteBuscado = int(records[0][0])
 
     mySql_idCardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
     cursor.execute(mySql_idCardapioSelect_query)
     records = cursor.fetchall()
-    idCardapioBuscado = int(records[0][0])
+    if (records != []):
+      idCardapioBuscado = int(records[0][0])
 
     mySql_idComidaSelect_query = "SELECT ID_Comida FROM Comida WHERE Nome = '{}' AND ID_cardapio = {}".format(nomeDaComida , idCardapioBuscado)
     cursor.execute(mySql_idComidaSelect_query)
     records = cursor.fetchall()
-    idComidaBuscado = int(records[0][0])
+    if (records != []):
+      idComidaBuscado = int(records[0][0])
 
     deletePrecoQuery = "DELETE FROM Preco WHERE ID_Comida = {}".format(idComidaBuscado)
     deleteContemQuery = "DELETE FROM Contem WHERE ID_Comida = {}".format(idComidaBuscado) 
@@ -392,18 +403,19 @@ def deleteProduct(nomeDoRestaurante,nomeDaComida):
       connection.close()
       print("MySQL connection is closed")
 
-#TODO Retorna o preço médio de cada comida vendida nos 7 dias anteriores
-def showProductAverageHistory(nomeDoRestaurante):
+#Retorna o preço médio de cada comida vendida nos 7 dias anteriores
+def showProductAverageHistory(nomeDoRestaurante, email):
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
                                          user="SKdTbdX8lK",
                                          passwd="yODtLD4Q0z",
                                          database='SKdTbdX8lK')
-    mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}'".format(nomeDoRestaurante)
+    mySql_idRestauranteSelect_query = "SELECT ID_restaurante FROM Restaurante WHERE Nome = '{}' AND Email = '{}'".format(nomeDoRestaurante, email)
     cursor = connection.cursor()
     cursor.execute(mySql_idRestauranteSelect_query)
     records = cursor.fetchall()
-    idRestauranteBuscado = int(records[0][0])
+    if(records != []):
+      idRestauranteBuscado = int(records[0][0])
 
     mySql_idCardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
     cursor.execute(mySql_idCardapioSelect_query)
@@ -417,15 +429,15 @@ def showProductAverageHistory(nomeDoRestaurante):
     cursor.execute(mySql_averageProductSelect_query)
     records = cursor.fetchall()
     #print(records)
-
-    for row in records:
-      idAtual = row[1]
-      mySql_comidaNameSelect_query = "SELECT Nome FROM Comida WHERE ID_Comida = {}".format(idAtual)
-      cursor = connection.cursor()
-      cursor.execute(mySql_comidaNameSelect_query)
-      recordsNomeComida = cursor.fetchall()
-      print('Nome da comida:', str(recordsNomeComida[0][0]))
-      print('Preço médio da comida nos últimos 7 dias: R$ %.2f' % row[0])
+    if(records != []):
+      for row in records:
+        idAtual = row[1]
+        mySql_comidaNameSelect_query = "SELECT Nome FROM Comida WHERE ID_Comida = {}".format(idAtual)
+        cursor = connection.cursor()
+        cursor.execute(mySql_comidaNameSelect_query)
+        recordsNomeComida = cursor.fetchall()
+        print('Nome da comida:', str(recordsNomeComida[0][0]))
+        print('Preço médio da comida nos últimos 7 dias: R$ %.2f' % row[0])
 
 
   except mysql.connector.Error as error:
@@ -437,7 +449,7 @@ def showProductAverageHistory(nomeDoRestaurante):
       connection.close()
       print("MySQL connection is closed")
 
-#TODO Função para mostrar as comidas de um restaurante
+#Função para mostrar as comidas de um restaurante
 def showProductsFromRestaurant(restaurante):
 
   try:
@@ -449,33 +461,35 @@ def showProductsFromRestaurant(restaurante):
     cursor = connection.cursor()
     cursor.execute(mySql_idSelect_query)
     records = cursor.fetchall()
-    idRestauranteBuscado = int(records[0][0])
-    #print(idRestauranteBuscado)
+    if (len(records) > 1):
+      for z in range(len(records)): 
+        idRestauranteBuscado = int(records[z][0])
+        #print(idRestauranteBuscado)
 
-    mySql_cardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
-    cursor.execute(mySql_cardapioSelect_query)
-    records = cursor.fetchall()
-    idCardapioBuscado = int(records[0][0])
-    #print(idCardapioBuscado)
-    
-    mySql_contemSelect_query = "SELECT * FROM Contem WHERE ID_cardapio = {}".format(idCardapioBuscado)
-    cursor.execute(mySql_contemSelect_query)
-    records = cursor.fetchall()
-    listaDeIdComidas = []
-    for row in records:
-      listaDeIdComidas.append(row[1])
-    for i in range(len(listaDeIdComidas)):
-      mySql_comidaSelect_query = "SELECT * FROM Comida WHERE ID_Comida = {}".format(listaDeIdComidas[i])
-      cursor.execute(mySql_comidaSelect_query)
-      records = cursor.fetchall()
-      for row in records:
-        print('\nNome do Produto:', row[1])
-        print('Categoria:', row[4])
-        print('Descrição:', row[2])        
-        mySql_precoSelect_query = "SELECT Valor FROM Preco WHERE ID_Comida = {}".format(listaDeIdComidas[i])
-        cursor.execute(mySql_precoSelect_query)
-        precoRecords = cursor.fetchall()
-        print('Preço: R${}'.format(float(precoRecords[0][0])))
+        mySql_cardapioSelect_query = "SELECT ID_cardapio FROM Cardapio WHERE ID_restaurante = {}".format(idRestauranteBuscado)
+        cursor.execute(mySql_cardapioSelect_query)
+        records = cursor.fetchall()
+        idCardapioBuscado = int(records[0][0])
+        #print(idCardapioBuscado)
+        
+        mySql_contemSelect_query = "SELECT * FROM Contem WHERE ID_cardapio = {}".format(idCardapioBuscado)
+        cursor.execute(mySql_contemSelect_query)
+        records = cursor.fetchall()
+        listaDeIdComidas = []
+        for row in records:
+          listaDeIdComidas.append(row[1])
+        for i in range(len(listaDeIdComidas)):
+          mySql_comidaSelect_query = "SELECT * FROM Comida WHERE ID_Comida = {}".format(listaDeIdComidas[i])
+          cursor.execute(mySql_comidaSelect_query)
+          records = cursor.fetchall()
+          for row in records:
+            print('\nNome do Produto:', row[1])
+            print('Categoria:', row[4])
+            print('Descrição:', row[2])        
+            mySql_precoSelect_query = "SELECT Valor FROM Preco WHERE ID_Comida = {}".format(listaDeIdComidas[i])
+            cursor.execute(mySql_precoSelect_query)
+            precoRecords = cursor.fetchall()
+            print('Preço: R${}'.format(float(precoRecords[0][0])))
   
   except mysql.connector.Error as error:
     print("Failed to get record into Restaurante table {}".format(error))
@@ -530,7 +544,7 @@ def showBestSellingProduct(nomeDoRestaurante, email):
       connection.close()
       print("MySQL connection is closed")
 
-#TODO Ao selecionar comida, retornar restaurantes que vendem
+#Ao selecionar comida, retornar restaurantes que vendem
 def showRestaurantsWithProduct(comida):
   try:
     connection = mysql.connector.connect(host='remotemysql.com',
@@ -633,21 +647,23 @@ def askRestaurantInput():
   tipoDeEntrega = input('Tipo da entrega: ')
   return categoria, nome, senha, email, telefone, endereco, tipoDeEntrega
 
-#Input dos campos necessários para inserir comida TODO: Questão da tabela Contem 
+#Input dos campos necessários para inserir comida !Questão da tabela Contem 
 def askProductInformationInput():
   print('Digite o nome do restaurante e os atributos da Tabela \'Comida\'')
   nomeRestaurante = input('Nome do Restaurante que terá essa comida: ')
+  emailDoRestaurante  = input('Email do restaurante: ')
   nomeComida = input('Nome da comida: ')
   descricao = input('Descrição: ')
   categoria = input('Categoria: ')
   preco = input('Preço: ')
-  return nomeRestaurante, nomeComida, descricao, categoria, preco
+  return nomeRestaurante, emailDoRestaurante, nomeComida, descricao, categoria, preco
 
 def askProductInfoForDeletion():
   print('\nDigite o nome dos atributos do produto que você quer deletar')
   nomeRestaurante = input('Nome do restaurante que tem a comida: ')
+  emailDoRestaurante = input('Email do restaurante: ')
   nomeComida = input('Nome da comida a ser deletada: ')
-  return nomeRestaurante, nomeComida
+  return nomeRestaurante, nomeComida, emailDoRestaurante
 
 def main():
   op = 1
@@ -678,17 +694,18 @@ def main():
       if (op == 4):
         showCategories()
       if (op == 5):
-        nomeRestaurante, nomeComida, descricao, categoria, preco= askProductInformationInput()
-        insertProduct(nomeRestaurante, nomeComida, descricao, categoria, preco)
+        nomeRestaurante, emailDoRestaurante, nomeComida, descricao, categoria, preco= askProductInformationInput()
+        insertProduct(nomeRestaurante, emailDoRestaurante, nomeComida, descricao, categoria, preco)
       if (op == 6):
         nomeDaComida = input("Digite o nome da comida que quer procurar: ")
         showRestaurantsWithProduct(nomeDaComida)
       if (op == 7):
-        nomeDoRestaurante, nomeDaComida = askProductInfoForDeletion()
-        deleteProduct(nomeDoRestaurante, nomeDaComida)
+        nomeDoRestaurante, nomeDaComida, emailDoRestaurante = askProductInfoForDeletion()
+        deleteProduct(nomeDoRestaurante, nomeDaComida, emailDoRestaurante)
       if (op == 8):
         nomeDoRestaurante = input('Nome do restaurante: ')
-        showProductAverageHistory(nomeDoRestaurante)
+        emailDoRestaurante = input('Email do restaurante: ')
+        showProductAverageHistory(nomeDoRestaurante, emailDoRestaurante)
       if (op == 9):
         nomeDoRestaurante = input ('Nome do restaurante: ')
         emailDoRestaurante = input('Email do restaurante: ')
@@ -703,10 +720,11 @@ def main():
 def testeInsertPedido():
   nomeDoUsuario = 'Jill Valentine'
   nomeDoRestaurante = 'Habibs'
+  emailDoRestaurante = 'habibscontato@org.com'
   enderecoDeEntrega = '1250 W South St, Raccon City'
-  listaDeIdComidas = [25]
+  listaDeIdComidas = [31]
   
-  insertPedido(nomeDoUsuario, nomeDoRestaurante, enderecoDeEntrega, listaDeIdComidas)
+  insertPedido(nomeDoUsuario, nomeDoRestaurante, emailDoRestaurante, enderecoDeEntrega, listaDeIdComidas)
 
 def most_frequent(List):
   occurence_count = Counter(List) 
